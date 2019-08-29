@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from boil_env_settarget import HeatEnv
+from boil_env import HeatEnv
 E = HeatEnv()
 
 def print_status():

@@ -1,8 +1,6 @@
 import numpy as np
 import gym
 import matplotlib.pyplot as plt
-from pylab import savefig
-import time
 from Tkinter import *
 
 import os
@@ -80,7 +78,7 @@ def plt_model(ind, s, r):
         plt.tight_layout()
         
         fname = '__trainingvid%05d.png'%(ind)
-        savefig(fname, dpi = 150)
+        plt.savefig(fname, dpi = 150)
         plt.clf()
 
 i = 0

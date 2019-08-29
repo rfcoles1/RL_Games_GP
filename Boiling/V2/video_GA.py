@@ -15,11 +15,11 @@ from GA_Network import Network
 config = Config()
 config.num_layers = 2
 config.num_hidden = 128
-config.env_name = 'GP_Water-v0'
+config.env_name = 'GP_Water-v1'
 config.a_size = 4
 
 network = Network(config)
-weights = np.load('../../../Genetic_Algorithms/models/GP_Water-v0/2.npz')
+weights = np.load('../../../Genetic_Algorithms/models/GP_Water-v2/50.npz')
 network.w_in = weights['w_in']
 network.w_hidden = weights['w_h']
 network.w_out = weights['w_out']
@@ -57,8 +57,8 @@ def plt_model(ind, s, r):
         plt.plot(Energy, Temp, 'k', label = 'True')
         plt.plot(Energy, TempMeans, 'r', label = 'Mean')
         plt.fill_between(Energy.flatten(), TempMeans - TempSdvs, TempMeans + TempSdvs, facecolor = 'r', alpha = 0.5, label = '1 sigma range')
-        plt.scatter(env.unwrapped.engine.EnergyIn, env.unwrapped.engine.get_state()[0][0], marker = 'D')
-        plt.scatter(env.unwrapped.engine.get_Energy_From_Temp(env.unwrapped.TargetTemp), env.unwrapped.TargetTemp, marker = '*')
+        plt.scatter(env.unwrapped.engine.EnergyIn, env.unwrapped.get_state()[0][0], marker = 'D')
+        plt.scatter(env.unwrapped.TargetE, env.unwrapped.engine.TargetT, color = 'y', marker = '*')
         plt.ylabel('Temperature ($^\circ$C)')
         plt.xlabel('Energy Added (kJ)')
         plt.ylim(top = max(Temp) +10, bottom = min(Temp) - 10)
@@ -68,8 +68,8 @@ def plt_model(ind, s, r):
         plt.plot(Energy, Mass, 'k', label = 'True')
         plt.plot(Energy, MassMeans, 'r', label = 'Mean')
         plt.fill_between(Energy.flatten(), MassMeans - MassSdvs, MassMeans + MassSdvs, facecolor = 'r', alpha = 0.5, label = '1 sigma range')
-        plt.scatter(env.unwrapped.engine.EnergyIn, env.unwrapped.engine.get_state()[0][1], marker = 'D')
-        plt.scatter(env.unwrapped.engine.get_Energy_From_Temp(env.unwrapped.TargetTemp), env.unwrapped.engine.encodeMass(env.unwrapped.TargetMass), marker = '*')
+        plt.scatter(env.unwrapped.engine.EnergyIn, env.unwrapped.get_state()[0][1], marker = 'D')
+        plt.scatter(env.unwrapped.TargetE, env.unwrapped.engine.TargetM, color = 'y', marker = '*')
         plt.ylabel('MassFractions')
         plt.xlabel('Energy Added (kJ)')
         plt.ylim(top = max(Mass) + 0.1, bottom = min(Mass) - 0.1)
@@ -80,6 +80,9 @@ def plt_model(ind, s, r):
         fname = '__trainingvid%05d.png'%(ind)
         plt.savefig(fname, dpi = 150)
         plt.clf()
+
+print(env.unwrapped.engine.TargetT)
+print(env.unwrapped.engine.TargetM)
 
 i = 0
 while True:
@@ -98,4 +101,6 @@ vidname = 'learner' + '0' + '.mp4'
 os.system('ffmpeg -r 10 -i __trainingvid%05d.png -vcodec mpeg4 -y ' + str(vidname))
 for i in range(0,i):
     os.remove('__trainingvid%05d.png'%(i))
+
+
 

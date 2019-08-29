@@ -1,1 +1,1 @@
-from GP_Games.Boiling.V1.boil_env import HeatEnv
+from GP_Games.Boiling.V2.boil_env import HeatEnv
