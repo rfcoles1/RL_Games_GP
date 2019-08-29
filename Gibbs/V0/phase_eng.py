@@ -11,6 +11,7 @@ def Gibbs(temperature, pressure):
     Z2 = np.exp(-(temperature - 1)**2 - (pressure - 1)**2)
     return height_scale*(Z1 - Z2) * 2
 
+
 def phase_check(gibbs):
     if gibbs   < -15:
         phase = 'i'
