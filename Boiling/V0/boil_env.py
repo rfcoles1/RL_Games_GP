@@ -1,7 +1,7 @@
 import numpy as np
 import gym
 import gym.spaces
-from boil_engine_settarget import Engine
+from boil_engine import Engine
 
 #in the style of OpenAi gym
 class HeatEnv(gym.Env):
