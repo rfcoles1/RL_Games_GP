@@ -11,8 +11,8 @@ class HeatEnv(gym.Env):
         self.done = False #There is no 'done' state, game runs until time limit 
 
         #change as desired
-        self.TargetTemp = 100
-        self.TargetMass = np.array([0, 0.5, 0.5])
+        self.TargetTemp = float(90)
+        self.TargetMass = np.array([0, 1, 0])
         
         self.incr = 10 #amount of energy added/taken per step 
 
@@ -54,7 +54,7 @@ class HeatEnv(gym.Env):
         dT_true = abs(true_T - TargetT)
         Terr = state[1][0]
         T_reward = -(dT_pred + dT_true + Terr)
-        
+
         dM_pred = abs(self.engine.decodeMass(state[0][1]*2) - self.TargetMass)
         dM_true = abs(true_M - self.TargetMass)
         Merr = state[1][1]
