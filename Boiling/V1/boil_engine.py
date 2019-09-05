@@ -13,9 +13,9 @@ HeatCap_Steam = 1.996 #kJ/kg/C
 #np.random.seed(1)
 
 class Engine(object):
-    def __init__(self): #must initalise at a temperature, not a mass fraction
+    def __init__(self):
         
-        self.RoomTemp = 21 
+        self.RoomTemp = 21.0 
         
         self.gen_critPoints() #calculates energy at which transitions begin/end
         self.minT = -50
@@ -29,13 +29,12 @@ class Engine(object):
                 
         #self.T = np.random.rand()*100
         #self.MassFractions = np.array([0,1,0]) #assumes initial is all water, change as appropriate
-
-        self.T, self.MassFractions = self.get_true_value(np.random.rand()*(self.maxE - self.minE) + self.minE)
+     
+        self.EnergyIn = np.random.rand()*(self.maxE - self.minE) + self.minE
+        self.T, self.MassFractions = self.get_true_value(self.EnergyIn)
 
         self.M =  self.encodeMass(self.MassFractions)  
         self.Terr, self.Merr = 0, 0
-        
-        self.EnergyIn = self.get_Energy_From_Temp(self.T)
         
         self.input_memory = []
         self.output_memory_T = []
@@ -188,7 +187,6 @@ class Engine(object):
         plt.scatter(self.EnergyIn, self.get_state()[0][0], marker = 'D')
         plt.ylabel('Temperature ($^\circ$C)')
         plt.xlabel('Energy Added (kJ)')
-        #plt.ylim(top = max(Temp) +10, bottom = min(Temp) - 10)
         plt.xlim(left = minE, right = maxE)
         plt.ylim(bottom = minT-100, top = maxT+100)        
         plt.legend()
@@ -200,7 +198,6 @@ class Engine(object):
         plt.scatter(self.EnergyIn, self.get_state()[0][1], marker = 'D')
         plt.ylabel('MassFractions')
         plt.xlabel('Energy Added (kJ)')
-        #plt.ylim(top = max(Mass) + 0.1, bottom = min(Mass) - 0.1)
         plt.xlim(left = minE, right = maxE)
         plt.ylim(bottom = -0.1, top = 2.1)
         plt.legend()
@@ -245,7 +242,7 @@ class Engine(object):
         plt.plot(Energy, Mass, 'k', label = 'True')
         plt.xlim(left = minE, right = maxE)
         plt.ylim(bottom = -0.1, top = 2.1)
-        plt.yticks([0,0.5,1,1.5,2],['100% Solid', '50% Solid/Liquid', 'All Liquid', '50% Liquid/Gas','All Gas'])
+        plt.yticks([0,0.5,1,1.5,2],['All Solid', '50% Solid/Liquid', 'All Liquid', '50% Liquid/Gas','All Gas'])
         plt.xlabel('Energy Added (kJ)')
         plt.ylabel('Mass Fractions')
         plt.tight_layout()

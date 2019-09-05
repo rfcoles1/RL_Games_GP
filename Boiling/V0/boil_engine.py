@@ -11,8 +11,8 @@ HeatCap_Water = 4.148 #kJ/kg/C
 HeatCap_Steam = 1.996 #kJ/kg/C
 
 class Engine(object):
-    def __init__(self, T = 21.0): #must initalise at a temperature, not a mass fraction
-        self.Ti = T
+    def __init__(self):
+
         self.RoomTemp = 21.0 
         
         self.gen_critPoints() #calculates energy at which transitions begin/end
@@ -25,7 +25,7 @@ class Engine(object):
 
     def reset(self):
         
-        self.T = self.Ti
+        self.T = self.RoomTemp
         self.MassFractions = np.array([0,1,0]) #assumes initial is all water, change as appropriate
         self.M =  self.encodeMass(self.MassFractions)  
         self.Terr, self.Merr = 0, 0
@@ -36,7 +36,7 @@ class Engine(object):
         self.output_memory_T = []
         self.output_memory_M = []   
 
-        self.add_data()
+        self.add_data()#calls gen_model
     
     #generates the models used for Temperature and Mass Fraction prediction
     def gen_model(self):
@@ -88,7 +88,8 @@ class Engine(object):
     
     def decodeMass(self, M):
         massfrac = np.zeros(3)
-        M = np.clip(M,0,2)
+        #the gp model is not bounded outside of observed data so we must clip
+        M = np.clip(M, 0, 2)
         mInd = int(np.ceil(M))
 
         if M%1 != 0:
@@ -164,7 +165,7 @@ class Engine(object):
             Mass[i] = self.encodeMass(self.get_true_value(Energy[i])[1])
             
         plt.figure()
-        plt.subplot(121)
+        plt.subplot(211)
         plt.plot(Energy, Temp, 'k', label = 'True')
         plt.plot(Energy, TempMeans, label = 'Mean')
         plt.fill_between(Energy.flatten(), TempMeans - TempSdvs, TempMeans + TempSdvs, facecolor = 'r', alpha = 0.5, label = '1 sigma range')
@@ -175,7 +176,7 @@ class Engine(object):
         plt.ylim(bottom = minT-100, top = maxT+100)
         plt.legend()
         
-        plt.subplot(122)
+        plt.subplot(212)
         plt.plot(Energy, Mass, 'k', label = 'True')
         plt.plot(Energy, MassMeans, label = 'Mean')
         plt.fill_between(Energy.flatten(), MassMeans - MassSdvs, MassMeans + MassSdvs, facecolor = 'r', alpha = 0.5, label = '1 sigma range')
@@ -227,7 +228,7 @@ class Engine(object):
         plt.plot(Energy, Mass, 'k', label = 'True')
         plt.xlim(left = minE, right = maxE)
         plt.ylim(bottom = -0.1, top = 2.1)
-        plt.yticks([0,0.5,1,1.5,2],['All Ice', '50% Ice/Water', 'All Water', '50% Water/Steam','All Steam'])
+        plt.yticks([0,0.5,1,1.5,2],['All Solid', '50% Solid/Liquid', 'All Liquid', '50% Liquid/Gas','All Gas'])
         plt.xlabel('Energy Added (kJ)')
         plt.ylabel('Mass Fractions')
         plt.tight_layout()

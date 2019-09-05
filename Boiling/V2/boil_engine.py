@@ -28,15 +28,14 @@ class Engine(object):
 
     def reset(self):
         
-        #self.T = self.Ti
-        self.T = np.random.rand()*100
-        self.Terr = 0
+        #self.T = np.random.rand()*100 
+        #self.MassFractions = np.array([0,1,0]) #assumes initial is all water, change as appropriate
         
-        self.MassFractions = np.array([0,1,0]) #assumes initial is all water, change as appropriate
+        self.EnergyIn = np.random.rand()*(self.maxE - self.minE) + self.minE
+        self.T, self.MassFractions = self.get_true_value(self.EnergyIn)
+
         self.M =  self.encodeMass(self.MassFractions)  
-        self.Merr = 0
-        
-        self.EnergyIn = self.get_Energy_From_Temp(self.T)
+        self.Terr, self.Merr = 0, 0
         
         self.input_memory_T = []
         self.output_memory_T = []
