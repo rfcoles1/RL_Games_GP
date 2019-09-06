@@ -10,14 +10,11 @@ HeatCap_Ice = 2.108 #kJ/kg/C
 HeatCap_Water = 4.148 #kJ/kg/C
 HeatCap_Steam = 1.996 #kJ/kg/C
 
-#np.random.seed(1)
-
 class Engine(object):
-    def __init__(self, T = 21.): #must initalise at a temperature, not a mass fraction
-        
-        self.Ti = T 
-        self.RoomTemp = 21.
-        
+    def __init__(self):
+
+        self.RoomTemp = 21.0
+
         self.gen_critPoints() #calculates energy at which transitions begin/end
         self.minT = -50
         self.maxT = 150
@@ -28,15 +25,13 @@ class Engine(object):
 
     def reset(self):
         
-        #self.T = np.random.rand()*100 
-        #self.MassFractions = np.array([0,1,0]) #assumes initial is all water, change as appropriate
-        
-        self.EnergyIn = np.random.rand()*(self.maxE - self.minE) + self.minE
-        self.T, self.MassFractions = self.get_true_value(self.EnergyIn)
-
+        self.T = self.RoomTemp
+        self.MassFractions = np.array([0,1,0]) #assumes initial is all water, change as appropriate
         self.M =  self.encodeMass(self.MassFractions)  
         self.Terr, self.Merr = 0, 0
         
+        self.EnergyIn = self.get_Energy_From_Temp(self.T)
+
         self.input_memory_T = []
         self.output_memory_T = []
         self.input_memory_M = []
@@ -46,12 +41,7 @@ class Engine(object):
         self.add_temp_data()#calls gen_model 
         self.add_mass_data()
         self.budget = 100 #first calls dont count against the budget
-
-    def set_target(self, TargetT, TargetM):
-        self.TargetT = TargetT
-        M = self.encodeMass(TargetM)
-        self.TargetM = M
-
+    
     #generates the models used for Temperature and Mass Fraction prediction
     def gen_temp_model(self):
         kern = GPy.kern.RBF(input_dim = 1, variance = .1, lengthscale=200.0) 
@@ -90,8 +80,7 @@ class Engine(object):
     def get_state(self):
         T = np.vstack([self.T, self.Terr])
         M = np.vstack([self.M, self.Merr])
-        Target = np.vstack([self.TargetT, self.TargetM]) 
-        return np.hstack([T, M, Target])
+        return np.hstack([T, M])
 
     def get_pred(self, inp):
         return self.TempModel._raw_predict(inp), self.MassModel._raw_predict(inp)
@@ -113,7 +102,6 @@ class Engine(object):
     
     def decodeMass(self, M):
         massfrac = np.zeros(3)
-        
         #the gp model is not bounded outside of observed data so we must clip
         M = np.clip(M, 0, 2)
         mInd = int(np.ceil(M))
@@ -198,9 +186,8 @@ class Engine(object):
         plt.scatter(self.EnergyIn, self.get_state()[0][0], marker = 'D')
         plt.ylabel('Temperature ($^\circ$C)')
         plt.xlabel('Energy Added (kJ)')
-        #plt.ylim(top = max(Temp) +10, bottom = min(Temp) - 10)
         plt.xlim(left = minE, right = maxE)
-        plt.ylim(bottom = minT, top = maxT)
+        plt.ylim(bottom = minT-100, top = maxT+100)
         plt.legend()
         
         plt.subplot(212)
@@ -210,7 +197,6 @@ class Engine(object):
         plt.scatter(self.EnergyIn, self.get_state()[0][1], marker = 'D')
         plt.ylabel('MassFractions')
         plt.xlabel('Energy Added (kJ)')
-        #plt.ylim(top = max(Mass) + 0.1, bottom = min(Mass) - 0.1)
         plt.xlim(left = minE, right = maxE)
         plt.ylim(bottom = -0.1, top = 2.1)
         plt.legend()
@@ -255,7 +241,7 @@ class Engine(object):
         plt.plot(Energy, Mass, 'k', label = 'True')
         plt.xlim(left = minE, right = maxE)
         plt.ylim(bottom = -0.1, top = 2.1)
-        plt.yticks([0,0.5,1,1.5,2],['All Ice', '50% Ice/Water', 'All Water', '50% Water/Steam','All Steam'])
+        plt.yticks([0,0.5,1,1.5,2],['All Solid', '50% Solid/Liquid', 'All Liquid', '50% Liquid/Gas','All Gas'])
         plt.xlabel('Energy Added (kJ)')
         plt.ylabel('Mass Fractions')
         plt.tight_layout()

@@ -10,6 +10,10 @@ class HeatEnv(gym.Env):
         self.engine = Engine()
         self.done = False #There is no 'done' state, game runs until time limit 
 
+        #change as desired
+        self.TargetTemp = float(90)
+        self.TargetMass = np.array([0, 1, 0])
+
         self.incr = 10 #amount of energy added/taken per step 
 
         self.action_space = gym.spaces.Discrete(5)
@@ -17,34 +21,21 @@ class HeatEnv(gym.Env):
         self.reset()
 
     def reset(self):
-        #change as desired
-        self.TargetE = np.random.rand()*(self.engine.maxE - self.engine.minE) + self.engine.minE
-        self.TargetTemp, self.TargetMass = self.engine.get_true_value(self.TargetE)
-
-        #self.TargetTemp = np.random.rand()*100
-        #self.TargetMass = np.array([0, 1, 0])
-        
-        self.engine.set_target(self.TargetTemp, self.TargetMass) 
-
         self.engine.reset()
         return self.engine.get_state()
 
     def get_state(self):
         state = self.engine.get_state()
 
-        T = (state[0][0] - self.engine.minT)/(self.engine.maxT - self.engine.minT)
-        Terr = state[1][0]/(self.engine.maxT - self.engine.minT)
+        T = (state[0,0] - self.engine.minT)/(self.engine.maxT - self.engine.minT)
+        Terr = state[1,0]/(self.engine.maxT - self.engine.minT)
         Temp = np.vstack([T,Terr])
 
         M = state[0,1]/2.0
         Merr = state[1,1]/2.0
         Mass = np.vstack([M,Merr])
 
-        TargetT = (state(state[0,2] - self.engine.minT)/(self.engine.maxT - self.engine.minT)
-        TargetM = (state[1,2])/2.0
-        Target = np.vstack([TargetT, TargetM])
-
-        return np.hstack([Temp, Mass, Target])
+        return np.hstack([Temp, Mass])
 
     def step(self, action):
         self.do_action(action)
@@ -56,17 +47,16 @@ class HeatEnv(gym.Env):
     def get_reward(self):
         state = self.get_state()
         true_T, true_M = self.engine.get_true_value(self.engine.EnergyIn)
-        
         true_T = (true_T - self.engine.minT)/(self.engine.maxT - self.engine.minT)
+        TargetT = (self.TargetTemp - self.engine.minT)/(self.engine.maxT - self.engine.minT)
 
-        dT_pred = abs(state[0][0] - state[0][2])
-        dT_true = abs(true_T - state[0][2])
+        dT_pred = abs(state[0][0] - TargetT)
+        dT_true = abs(true_T - TargetT)
         Terr = state[1][0]
         T_reward = -(dT_pred + dT_true + Terr)
-       
-        targetmass = self.engine.decodeMass(state[1][2]*2)
-        dM_pred = abs(self.engine.decodeMass(state[0][1]*2) - targetmass)
-        dM_true = abs(true_M - targetmass)
+
+        dM_pred = abs(self.engine.decodeMass(state[0][1]*2) - self.TargetMass)
+        dM_true = abs(true_M - self.TargetMass)
         Merr = state[1][1]
         M_reward = -(np.sum(dM_true) + np.sum(dM_pred) + Merr)
         
