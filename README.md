@@ -17,6 +17,7 @@ Environment | Description
 GP_Water-v0 | Basic Version. State contains [T, Terr, M, Merr] to achieve a fixed target.
 GP_Water-v1 | Target values for T and M are added to the state. Target can be moved.
 GP_Water-v2 | Observations actions are split for T and M. Each observation now comes with a cost. 
+GP_Water-v3 | Energy added to action, can remove either T or M from state and reach a target.
 
 # Requirements 
 Requirements for the environments: numpy, GPy, matplotlib, gym
